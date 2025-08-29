@@ -26,7 +26,8 @@ export default {
 				foreground: 'hsl(var(--foreground))',
 				primary: {
 					DEFAULT: 'hsl(var(--primary))',
-					foreground: 'hsl(var(--primary-foreground))'
+					foreground: 'hsl(var(--primary-foreground))',
+					glow: 'hsl(var(--primary-glow))'
 				},
 				secondary: {
 					DEFAULT: 'hsl(var(--secondary))',
@@ -52,6 +53,20 @@ export default {
 					DEFAULT: 'hsl(var(--card))',
 					foreground: 'hsl(var(--card-foreground))'
 				},
+				success: {
+					DEFAULT: 'hsl(var(--success))',
+					foreground: 'hsl(var(--success-foreground))'
+				},
+				warning: {
+					DEFAULT: 'hsl(var(--warning))',
+					foreground: 'hsl(var(--warning-foreground))'
+				},
+				role: {
+					analyst: 'hsl(var(--role-analyst))',
+					pm: 'hsl(var(--role-pm))',
+					dev: 'hsl(var(--role-dev))',
+					qa: 'hsl(var(--role-qa))'
+				},
 				sidebar: {
 					DEFAULT: 'hsl(var(--sidebar-background))',
 					foreground: 'hsl(var(--sidebar-foreground))',
@@ -67,6 +82,20 @@ export default {
 				lg: 'var(--radius)',
 				md: 'calc(var(--radius) - 2px)',
 				sm: 'calc(var(--radius) - 4px)'
+			},
+			backgroundImage: {
+				'gradient-primary': 'var(--gradient-primary)',
+				'gradient-surface': 'var(--gradient-surface)',
+				'gradient-role-analyst': 'var(--gradient-role-analyst)',
+				'gradient-role-pm': 'var(--gradient-role-pm)',
+				'gradient-role-dev': 'var(--gradient-role-dev)',
+				'gradient-role-qa': 'var(--gradient-role-qa)'
+			},
+			boxShadow: {
+				'kanban': 'var(--shadow-sm)',
+				'kanban-hover': 'var(--shadow-md)',
+				'kanban-focus': 'var(--shadow-lg)',
+				'glow': 'var(--shadow-glow)'
 			},
 			keyframes: {
 				'accordion-down': {

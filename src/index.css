@@ -2,41 +2,77 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
-All colors MUST be HSL.
-*/
+/* Kanban Board Design System - Professional Development Theme */
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
-
+    /* Core Background & Text */
+    --background: 220 20% 97%;
+    --foreground: 220 15% 15%;
+    
+    /* Cards & Surfaces */
     --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
-
+    --card-foreground: 220 15% 15%;
+    
+    /* Popover & Modal */
     --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
-
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
-
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
-
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
-
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
-
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
-
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
-
-    --radius: 0.5rem;
+    --popover-foreground: 220 15% 15%;
+    
+    /* Primary Brand Colors - Professional Blue */
+    --primary: 220 70% 55%;
+    --primary-foreground: 0 0% 100%;
+    --primary-glow: 220 80% 65%;
+    
+    /* Secondary Colors */
+    --secondary: 220 15% 95%;
+    --secondary-foreground: 220 15% 25%;
+    
+    /* Muted Elements */
+    --muted: 220 15% 94%;
+    --muted-foreground: 220 10% 45%;
+    
+    /* Accent Colors */
+    --accent: 260 60% 65%;
+    --accent-foreground: 0 0% 100%;
+    
+    /* Status Colors */
+    --success: 140 60% 45%;
+    --success-foreground: 0 0% 100%;
+    --warning: 35 90% 55%;
+    --warning-foreground: 0 0% 100%;
+    --destructive: 0 65% 55%;
+    --destructive-foreground: 0 0% 100%;
+    
+    /* Role-Specific Colors */
+    --role-analyst: 200 85% 60%;
+    --role-pm: 280 65% 60%;
+    --role-dev: 160 70% 50%;
+    --role-qa: 25 90% 60%;
+    
+    /* Borders & Inputs */
+    --border: 220 20% 88%;
+    --input: 220 20% 90%;
+    --ring: 220 70% 55%;
+    
+    /* Gradients */
+    --gradient-primary: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--accent)));
+    --gradient-surface: linear-gradient(180deg, hsl(var(--card)), hsl(var(--muted)));
+    --gradient-role-analyst: linear-gradient(135deg, hsl(var(--role-analyst)), hsl(200 70% 70%));
+    --gradient-role-pm: linear-gradient(135deg, hsl(var(--role-pm)), hsl(280 50% 70%));
+    --gradient-role-dev: linear-gradient(135deg, hsl(var(--role-dev)), hsl(160 55% 60%));
+    --gradient-role-qa: linear-gradient(135deg, hsl(var(--role-qa)), hsl(25 75% 70%));
+    
+    /* Shadows */
+    --shadow-sm: 0 2px 8px hsl(var(--foreground) / 0.04);
+    --shadow-md: 0 4px 16px hsl(var(--foreground) / 0.08);
+    --shadow-lg: 0 8px 32px hsl(var(--foreground) / 0.12);
+    --shadow-glow: 0 0 20px hsl(var(--primary) / 0.15);
+    
+    /* Animations */
+    --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-bounce: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    
+    --radius: 0.75rem;
 
     --sidebar-background: 0 0% 98%;
 
@@ -101,5 +137,50 @@ All colors MUST be HSL.
 
   body {
     @apply bg-background text-foreground;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  }
+}
+
+/* Custom Kanban Animations */
+@layer components {
+  .kanban-card {
+    transition: var(--transition-smooth);
+    box-shadow: var(--shadow-sm);
+  }
+  
+  .kanban-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+  }
+  
+  .role-badge {
+    transition: var(--transition-bounce);
+  }
+  
+  .role-badge:hover {
+    transform: scale(1.05);
+  }
+  
+  .chat-message {
+    animation: slideInUp 0.3s ease-out;
+  }
+  
+  @keyframes slideInUp {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  
+  .kanban-column {
+    transition: var(--transition-smooth);
+  }
+  
+  .kanban-column:hover {
+    background: var(--gradient-surface);
   }
 }
