@@ -166,7 +166,7 @@ export function AgentChat({ role, isOpen, onClose }: AgentChatProps) {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-background/80 backdrop-blur-sm z-50">
+    <div className="fixed inset-0 bg-background/80 backdrop-blur-sm z-50" style={{ zIndex: 9999 }}>
       <div className="absolute right-0 top-0 h-full w-96 bg-card border-l shadow-kanban-focus">
         <Card className="h-full rounded-none border-0">
           <CardHeader className={cn("pb-4", agentConfig.gradient, "text-white")}>
@@ -195,8 +195,8 @@ export function AgentChat({ role, isOpen, onClose }: AgentChatProps) {
 
           <CardContent className="flex flex-col h-full p-0">
             {/* Messages */}
-            <ScrollArea className="flex-1 p-4">
-              <div className="space-y-4">
+            <ScrollArea className="flex-1 p-4 max-h-[60vh]">
+              <div className="space-y-4 pr-4">
                 {messages.map((message) => (
                   <div key={message.id} className="chat-message">
                     <div className={cn(

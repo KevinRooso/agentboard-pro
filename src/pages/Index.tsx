@@ -52,6 +52,7 @@ const Index = () => {
         isOpen={isTicketModalOpen}
         onClose={handleTicketModalClose}
         currentRole={currentRole}
+        onChatOpen={handleChatOpen}
       />
       
       <DocumentationModal 

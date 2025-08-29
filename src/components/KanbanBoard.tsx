@@ -132,7 +132,7 @@ export function KanbanBoard({
     mockTickets.filter(ticket => ticket.status === status);
 
   const getActionButton = (ticket: Ticket) => {
-    if (currentRole === 'dev' && ticket.status === 'backlog') {
+    if (currentRole === 'dev' && ticket.status === 'in-progress') {
       return (
         <Button 
           size="sm" 
@@ -245,7 +245,7 @@ export function KanbanBoard({
                   </div>
                 </div>
                 
-                <div className="space-y-3 h-full overflow-y-auto">
+                <div className="space-y-3 overflow-y-auto max-h-[calc(100vh-300px)]">
                   {tickets.map((ticket) => (
                     <Card 
                       key={ticket.id}

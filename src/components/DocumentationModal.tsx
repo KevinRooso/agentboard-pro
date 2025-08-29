@@ -4,6 +4,7 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
+  DialogDescription,
 } from '@/components/ui/dialog';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -130,6 +131,9 @@ export function DocumentationModal({ isOpen, onClose }: DocumentationModalProps)
               <FileText className="w-6 h-6" />
               <span>Project Documentation</span>
             </DialogTitle>
+            <DialogDescription className="sr-only">
+              Comprehensive project documentation including overview, roles, and workflow
+            </DialogDescription>
             <div className="flex space-x-2">
               <Button variant="outline" size="sm">
                 <Edit className="w-4 h-4 mr-2" />
@@ -166,10 +170,10 @@ export function DocumentationModal({ isOpen, onClose }: DocumentationModalProps)
                   <CardHeader>
                     <CardTitle>Project Overview</CardTitle>
                   </CardHeader>
-                  <CardContent className="h-full overflow-hidden">
-                    <ScrollArea className="h-full">
-                      <div className="prose prose-sm max-w-none">
-                        <pre className="whitespace-pre-wrap text-sm bg-muted p-4 rounded-lg">
+                  <CardContent className="h-full overflow-hidden p-4">
+                    <ScrollArea className="h-[500px] w-full">
+                      <div className="prose prose-sm max-w-none pr-4">
+                        <pre className="whitespace-pre-wrap text-sm bg-muted p-4 rounded-lg break-words">
                           {mockDocumentation.overview}
                         </pre>
                       </div>
@@ -183,10 +187,10 @@ export function DocumentationModal({ isOpen, onClose }: DocumentationModalProps)
                   <CardHeader>
                     <CardTitle>Role Definitions</CardTitle>
                   </CardHeader>
-                  <CardContent className="h-full overflow-hidden">
-                    <ScrollArea className="h-full">
-                      <div className="prose prose-sm max-w-none">
-                        <pre className="whitespace-pre-wrap text-sm bg-muted p-4 rounded-lg">
+                  <CardContent className="h-full overflow-hidden p-4">
+                    <ScrollArea className="h-[500px] w-full">
+                      <div className="prose prose-sm max-w-none pr-4">
+                        <pre className="whitespace-pre-wrap text-sm bg-muted p-4 rounded-lg break-words">
                           {mockDocumentation.roles}
                         </pre>
                       </div>
@@ -200,10 +204,10 @@ export function DocumentationModal({ isOpen, onClose }: DocumentationModalProps)
                   <CardHeader>
                     <CardTitle>Workflow Process</CardTitle>
                   </CardHeader>
-                  <CardContent className="h-full overflow-hidden">
-                    <ScrollArea className="h-full">
-                      <div className="prose prose-sm max-w-none">
-                        <pre className="whitespace-pre-wrap text-sm bg-muted p-4 rounded-lg">
+                  <CardContent className="h-full overflow-hidden p-4">
+                    <ScrollArea className="h-[500px] w-full">
+                      <div className="prose prose-sm max-w-none pr-4">
+                        <pre className="whitespace-pre-wrap text-sm bg-muted p-4 rounded-lg break-words">
                           {mockDocumentation.workflow}
                         </pre>
                       </div>

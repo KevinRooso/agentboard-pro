@@ -4,6 +4,7 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
+  DialogDescription,
 } from '@/components/ui/dialog';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -28,6 +29,7 @@ interface TicketModalProps {
   isOpen: boolean;
   onClose: () => void;
   currentRole: Role;
+  onChatOpen: (role: Role) => void;
 }
 
 const mockPRD = `
@@ -82,13 +84,13 @@ Implement a secure and user-friendly authentication system that allows users to 
 - [ ] Documentation updated
 `;
 
-export function TicketModal({ ticket, isOpen, onClose, currentRole }: TicketModalProps) {
+export function TicketModal({ ticket, isOpen, onClose, currentRole, onChatOpen }: TicketModalProps) {
   if (!ticket) return null;
 
   const getActionButtons = () => {
     const buttons = [];
     
-    if (currentRole === 'dev' && ticket.status === 'backlog') {
+    if (currentRole === 'dev' && ticket.status === 'in-progress') {
       buttons.push(
         <Button key="implement" className="bg-role-dev hover:bg-role-dev/90">
           <Play className="w-4 h-4 mr-2" />
@@ -107,7 +109,11 @@ export function TicketModal({ ticket, isOpen, onClose, currentRole }: TicketModa
     }
     
     buttons.push(
-      <Button key="chat" variant="outline">
+      <Button 
+        key="chat" 
+        variant="outline"
+        onClick={() => onChatOpen(currentRole)}
+      >
         <MessageCircle className="w-4 h-4 mr-2" />
         Discuss with Agent
       </Button>
@@ -122,6 +128,9 @@ export function TicketModal({ ticket, isOpen, onClose, currentRole }: TicketModa
         <DialogHeader>
           <div className="flex items-center justify-between">
             <DialogTitle className="text-xl font-bold">{ticket.id}</DialogTitle>
+            <DialogDescription className="sr-only">
+              Ticket details and requirements for {ticket.title}
+            </DialogDescription>
             <div className="flex items-center space-x-2">
               <Badge variant="secondary">
                 {ticket.storyPoints} story points
@@ -231,10 +240,10 @@ export function TicketModal({ ticket, isOpen, onClose, currentRole }: TicketModa
                 </Button>
               </div>
             </CardHeader>
-            <CardContent className="flex-1 overflow-hidden">
-              <ScrollArea className="h-full">
-                <div className="prose prose-sm max-w-none">
-                  <pre className="whitespace-pre-wrap text-sm font-mono bg-muted p-4 rounded-lg">
+            <CardContent className="flex-1 overflow-hidden p-4">
+              <ScrollArea className="h-[400px] w-full">
+                <div className="prose prose-sm max-w-none pr-4">
+                  <pre className="whitespace-pre-wrap text-sm font-mono bg-muted p-4 rounded-lg break-words">
                     {mockPRD}
                   </pre>
                 </div>
