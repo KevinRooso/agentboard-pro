@@ -1,21 +1,26 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
-import { 
-  Send, 
-  Bot, 
-  User, 
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Loader2 } from 'lucide-react';
+import {
+  Send,
+  Bot,
+  User,
   X,
   FileText,
   Lightbulb,
   Code,
-  TestTube
+  TestTube,
+  AlertCircle
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { apiService, type ChatResponse } from '@/lib/api';
+import { FormattedMessage } from './FormattedMessage';
 import type { Role } from './KanbanBoard';
 
 interface Message {
@@ -24,6 +29,8 @@ interface Message {
   sender: 'user' | 'agent';
   timestamp: Date;
   suggestions?: string[];
+  context_used?: string;
+  workflow_suggestions?: string[];
 }
 
 interface AgentChatProps {
@@ -127,36 +134,92 @@ const mockMessages: Record<Role, Message[]> = {
 };
 
 export function AgentChat({ role, isOpen, onClose }: AgentChatProps) {
-  const [messages, setMessages] = useState<Message[]>(mockMessages[role]);
+  const [messages, setMessages] = useState<Message[]>([]);
   const [inputMessage, setInputMessage] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  // Scroll to bottom when new messages arrive
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [messages, isLoading]);
+
+  // Initialize with welcome message when component opens
+  useEffect(() => {
+    if (isOpen && messages.length === 0) {
+      const welcomeMessage: Message = {
+        id: 'welcome',
+        content: `Hello! I'm your ${roleAgentConfig[role].name}. ${roleAgentConfig[role].description}. How can I help you today?`,
+        sender: 'agent',
+        timestamp: new Date(),
+        suggestions: roleAgentConfig[role].suggestions
+      };
+      setMessages([welcomeMessage]);
+    }
+  }, [isOpen, role, messages.length]);
   
   const agentConfig = roleAgentConfig[role];
   const Icon = agentConfig.icon;
 
-  const sendMessage = () => {
-    if (!inputMessage.trim()) return;
+  const sendMessage = async () => {
+    if (!inputMessage.trim() || isLoading) return;
 
     const userMessage: Message = {
       id: Date.now().toString(),
-      content: inputMessage,
+      content: inputMessage.trim(),
       sender: 'user',
       timestamp: new Date()
     };
 
     setMessages(prev => [...prev, userMessage]);
     setInputMessage('');
+    setIsLoading(true);
+    setError(null);
 
-    // Simulate AI response
-    setTimeout(() => {
+    try {
+      const chatRequest = {
+        message: inputMessage.trim(),
+        context: {
+          role: role,
+          previous_messages: messages.slice(-10).map(m => ({
+            sender: m.sender,
+            content: m.content,
+            timestamp: m.timestamp.toISOString()
+          }))
+        }
+      };
+
+      const response: ChatResponse = await apiService.chatWithRole(role, chatRequest);
+
       const agentResponse: Message = {
         id: (Date.now() + 1).toString(),
-        content: `I understand you want to "${inputMessage}". Let me help you with that. This is a simulated response - in the real application, this would connect to your AI agents.`,
+        content: response.response,
+        sender: 'agent',
+        timestamp: new Date(response.timestamp),
+        context_used: response.context_used,
+        workflow_suggestions: response.workflow_suggestions,
+        suggestions: agentConfig.suggestions
+      };
+
+      setMessages(prev => [...prev, agentResponse]);
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to get response from AI agent';
+      setError(errorMessage);
+
+      // Add error message to chat
+      const errorResponse: Message = {
+        id: (Date.now() + 1).toString(),
+        content: `Sorry, I encountered an error: ${errorMessage}. Please try again or check if the backend server is running.`,
         sender: 'agent',
         timestamp: new Date(),
         suggestions: agentConfig.suggestions
       };
-      setMessages(prev => [...prev, agentResponse]);
-    }, 1000);
+
+      setMessages(prev => [...prev, errorResponse]);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleSuggestionClick = (suggestion: string) => {
@@ -195,8 +258,8 @@ export function AgentChat({ role, isOpen, onClose }: AgentChatProps) {
 
           <CardContent className="flex flex-col h-full p-0">
             {/* Messages */}
-            <ScrollArea className="flex-1 p-4 max-h-[60vh]">
-              <div className="space-y-4 pr-4">
+            <div className="flex-1 p-4 max-h-96 overflow-y-auto min-h-0">
+              <div className="space-y-4">
                 {messages.map((message) => (
                   <div key={message.id} className="chat-message">
                     <div className={cn(
@@ -204,7 +267,7 @@ export function AgentChat({ role, isOpen, onClose }: AgentChatProps) {
                       message.sender === 'user' ? "justify-end" : "justify-start"
                     )}>
                       {message.sender === 'agent' && (
-                        <Avatar className="w-8 h-8">
+                        <Avatar className="w-8 h-8 flex-shrink-0">
                           <AvatarFallback className={agentConfig.color}>
                             <Bot className="w-4 h-4 text-white" />
                           </AvatarFallback>
@@ -212,19 +275,37 @@ export function AgentChat({ role, isOpen, onClose }: AgentChatProps) {
                       )}
                       
                       <div className={cn(
-                        "max-w-[80%] p-3 rounded-lg",
-                        message.sender === 'user' 
-                          ? "bg-primary text-primary-foreground ml-auto" 
+                        "max-w-[75%] p-3 rounded-lg break-words overflow-hidden",
+                        message.sender === 'user'
+                          ? "bg-primary text-primary-foreground ml-auto"
                           : "bg-muted"
                       )}>
-                        <p className="text-sm">{message.content}</p>
-                        <span className="text-xs opacity-70 mt-1 block">
+                        <div className="text-sm break-words overflow-wrap-anywhere">
+                          <FormattedMessage content={message.content} />
+                        </div>
+                        <span className="text-xs opacity-70 mt-2 block">
                           {message.timestamp.toLocaleTimeString()}
                         </span>
+
+                        {/* Show context and workflow info for agent messages */}
+                        {message.sender === 'agent' && (
+                          <div className="mt-2 space-y-1">
+                            {message.context_used && (
+                              <div className="text-xs opacity-60">
+                                Context: {message.context_used}
+                              </div>
+                            )}
+                            {message.workflow_suggestions && message.workflow_suggestions.length > 0 && (
+                              <div className="text-xs opacity-60">
+                                Suggested workflows: {message.workflow_suggestions.join(', ')}
+                              </div>
+                            )}
+                          </div>
+                        )}
                       </div>
                       
                       {message.sender === 'user' && (
-                        <Avatar className="w-8 h-8">
+                        <Avatar className="w-8 h-8 flex-shrink-0">
                           <AvatarFallback>
                             <User className="w-4 h-4" />
                           </AvatarFallback>
@@ -253,21 +334,66 @@ export function AgentChat({ role, isOpen, onClose }: AgentChatProps) {
                     )}
                   </div>
                 ))}
+
+                {/* Loading Animation */}
+                {isLoading && (
+                  <div className="flex items-start space-x-2">
+                    <Avatar className="w-8 h-8 flex-shrink-0">
+                      <AvatarFallback className={agentConfig.color}>
+                        <Bot className="w-4 h-4 text-white" />
+                      </AvatarFallback>
+                    </Avatar>
+                    <div className="bg-muted p-3 rounded-lg max-w-[75%] break-words overflow-hidden">
+                      <div className="flex items-center space-x-2">
+                        <div className="flex space-x-1">
+                          <div className="w-2 h-2 bg-muted-foreground rounded-full animate-bounce [animation-delay:-0.3s]"></div>
+                          <div className="w-2 h-2 bg-muted-foreground rounded-full animate-bounce [animation-delay:-0.15s]"></div>
+                          <div className="w-2 h-2 bg-muted-foreground rounded-full animate-bounce"></div>
+                        </div>
+                        <span className="text-sm text-muted-foreground break-words">
+                          {agentConfig.name} is thinking...
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Scroll anchor */}
+                <div ref={messagesEndRef} />
               </div>
-            </ScrollArea>
+            </div>
+
+            {/* Error Display */}
+            {error && (
+              <div className="border-t p-4">
+                <Alert variant="destructive">
+                  <AlertCircle className="h-4 w-4" />
+                  <AlertDescription>{error}</AlertDescription>
+                </Alert>
+              </div>
+            )}
 
             {/* Input Area */}
-            <div className="border-t p-4 space-y-3">
+            <div className="border-t p-3 flex-shrink-0">
               <div className="flex space-x-2">
                 <Input
                   placeholder={`Message ${agentConfig.name}...`}
                   value={inputMessage}
                   onChange={(e) => setInputMessage(e.target.value)}
-                  onKeyPress={(e) => e.key === 'Enter' && sendMessage()}
+                  onKeyPress={(e) => e.key === 'Enter' && !isLoading && sendMessage()}
                   className="flex-1"
+                  disabled={isLoading}
                 />
-                <Button onClick={sendMessage} size="sm">
-                  <Send className="w-4 h-4" />
+                <Button
+                  onClick={sendMessage}
+                  size="sm"
+                  disabled={isLoading || !inputMessage.trim()}
+                >
+                  {isLoading ? (
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                  ) : (
+                    <Send className="w-4 h-4" />
+                  )}
                 </Button>
               </div>
               

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { 
   Dialog,
   DialogContent,
@@ -22,10 +22,11 @@ import {
   ExternalLink
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import type { Ticket, Role } from './KanbanBoard';
+import type { Ticket, Role, Epic } from './KanbanBoard';
 
 interface TicketModalProps {
   ticket: Ticket | null;
+  epics: Epic[];
   isOpen: boolean;
   onClose: () => void;
   currentRole: Role;
@@ -84,8 +85,13 @@ Implement a secure and user-friendly authentication system that allows users to 
 - [ ] Documentation updated
 `;
 
-export function TicketModal({ ticket, isOpen, onClose, currentRole, onChatOpen }: TicketModalProps) {
+export function TicketModal({ ticket, epics, isOpen, onClose, currentRole, onChatOpen }: TicketModalProps) {
+  const [isFullPRDOpen, setIsFullPRDOpen] = useState(false);
+
   if (!ticket) return null;
+
+  // Find the epic for this ticket
+  const epic = ticket.epicId ? epics.find(e => e.id === ticket.epicId) : null;
 
   const getActionButtons = () => {
     const buttons = [];
@@ -146,7 +152,7 @@ export function TicketModal({ ticket, isOpen, onClose, currentRole, onChatOpen }
           </div>
         </DialogHeader>
         
-        <div className="flex-1 grid grid-cols-1 lg:grid-cols-2 gap-6 overflow-hidden">
+        <div className="flex-1 grid grid-cols-1 lg:grid-cols-2 gap-6 overflow-y-auto">
           {/* Left Column - Ticket Details */}
           <div className="space-y-6">
             <Card>
@@ -171,7 +177,7 @@ export function TicketModal({ ticket, isOpen, onClose, currentRole, onChatOpen }
                   </div>
                   <div className="flex items-center space-x-2">
                     <Calendar className="w-4 h-4 text-muted-foreground" />
-                    <span>Epic: {ticket.epicId}</span>
+                    <span>Epic: {epic ? epic.title : (ticket.epicId || 'None')}</span>
                   </div>
                   <div className="flex items-center space-x-2">
                     <GitBranch className="w-4 h-4 text-muted-foreground" />
@@ -234,24 +240,47 @@ export function TicketModal({ ticket, isOpen, onClose, currentRole, onChatOpen }
                   <FileText className="w-5 h-5" />
                   <span>Product Requirements Document</span>
                 </CardTitle>
-                <Button variant="outline" size="sm">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setIsFullPRDOpen(true)}
+                >
                   <ExternalLink className="w-4 h-4 mr-2" />
                   Open Full PRD
                 </Button>
               </div>
             </CardHeader>
-            <CardContent className="flex-1 overflow-hidden p-4">
-              <ScrollArea className="h-[400px] w-full">
-                <div className="prose prose-sm max-w-none pr-4">
+            <CardContent className="flex-1 p-4">
+              <div className="h-full overflow-y-auto scrollbar-thin scrollbar-thumb-muted scrollbar-track-transparent">
+                <div className="prose prose-sm max-w-none">
                   <pre className="whitespace-pre-wrap text-sm font-mono bg-muted p-4 rounded-lg break-words">
                     {mockPRD}
                   </pre>
                 </div>
-              </ScrollArea>
+              </div>
             </CardContent>
           </Card>
         </div>
       </DialogContent>
+
+      {/* Full PRD Modal */}
+      <Dialog open={isFullPRDOpen} onOpenChange={setIsFullPRDOpen}>
+        <DialogContent className="max-w-5xl h-[95vh]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center space-x-2">
+              <FileText className="w-5 h-5" />
+              <span>Full Product Requirements Document - {ticket.id}</span>
+            </DialogTitle>
+          </DialogHeader>
+          <div className="flex-1 overflow-y-auto p-6">
+            <div className="prose prose-sm max-w-none">
+              <pre className="whitespace-pre-wrap text-sm font-mono bg-muted p-6 rounded-lg break-words leading-relaxed">
+                {mockPRD}
+              </pre>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </Dialog>
   );
 }
